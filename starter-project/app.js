@@ -1,7 +1,3 @@
-/*
- * Copyright (c) Microsoft. All rights reserved. Licensed under the MIT license.
- * See LICENSE in the project root for license information.
- */
 // application dependencies
 const express = require('express');
 const session = require('express-session');
@@ -63,11 +59,17 @@ app.use(cookieParser());
 // session middleware configuration
 // see https://github.com/expressjs/session
 app.use(session({
-  secret: '12345QWERTY-SECRET',
+  secret: process.env.SESSION_SECRET || 'default-secret',
   name: 'graphNodeCookie',
   resave: false,
   saveUninitialized: false,
-  //cookie: {secure: true} // For development only
+  cookie: {
+    httpOnly: true,
+    secure: app.get('env') === 'production',
+    domain: 'example.com', // replace with your domain
+    path: '/',
+    expires: new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+  }
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(passport.initialize());
